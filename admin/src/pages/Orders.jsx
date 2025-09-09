@@ -1,18 +1,14 @@
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { backendUrl, currency } from "../App";
 import { assets } from "../assets/assets";
+
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
 
   const fetchAllOrders = async () => {
-    if (!token) {
-      return null;
-    }
-
+    if (!token) return;
     try {
       const response = await axios.post(
         backendUrl + "/api/order/list",
@@ -40,74 +36,70 @@ const Orders = ({ token }) => {
         },
         { headers: { token } }
       );
-
       if (response.data.success) {
         await fetchAllOrders();
       }
     } catch (error) {
       console.log(error);
-      toast.error(response.data.message);
+      toast.error(error.message);
     }
   };
+
   useEffect(() => {
     fetchAllOrders();
   }, [token]);
+
   return (
-    <div>
-      <h3>Order Page</h3>
-      <div>
+    <div className="p-4 sm:p-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Orders</h3>
+
+      <div className="space-y-5">
         {orders.map((order, index) => (
           <div
-            className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr_1fr] gap-3 items-start border-2 border-gray-200 p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700"
             key={index}
+            className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4 items-start border rounded-xl shadow-sm bg-white p-4 sm:p-6"
           >
-            <img className="w-12" src={assets.parcel_icon} alt="" />
-            <div>
-              <div>
-                {order.items.map((item, index) => {
-                  if (index === order.items.length - 1) {
-                    return (
-                      <p className="py-0.5" key={index}>
-                        {item.name} X {item.quantity}
-                        <span>{item.size}</span>
-                      </p>
-                    );
-                  } else {
-                    return (
-                      <p className="py-0.5" key={index}>
-                        {item.name} X {item.quantity}
-                        <span>{item.size}</span>,
-                      </p>
-                    );
-                  }
-                })}
+            {/* Icon */}
+            <img className="w-12 h-12 object-contain" src={assets.parcel_icon} alt="Parcel" />
+
+            {/* Items & Address */}
+            <div className="space-y-2">
+              <div className="space-y-1">
+                {order.items.map((item, i) => (
+                  <p key={i} className="text-sm text-gray-700">
+                    {item.name} × {item.quantity} <span className="text-gray-500">({item.size})</span>
+                  </p>
+                ))}
               </div>
-              <p className="mt-3 mb-2 font-medium">
-                {order.address.firstName + " " + order.address.lastName}
+              <p className="font-medium text-gray-800">
+                {order.address.firstName} {order.address.lastName}
               </p>
-              <div>
-                <p>{order.address.street + ","}</p>
-                <p>{order.address.city + "," + order.address.state + " "}</p>
-                <p>{order.address.country + "," + order.address.zipcode}</p>
+              <div className="text-gray-600 text-sm space-y-0.5">
+                <p>{order.address.street}</p>
+                <p>{order.address.city}, {order.address.state}</p>
+                <p>{order.address.country} - {order.address.zipcode}</p>
+                <p>📞 {order.address.phone}</p>
               </div>
-              <p>{order.address.phone}</p>
             </div>
-            <div>
-              <p className="text-sm sm:text-[15px]">
-                Items : {order.items.length}
-              </p>
-              <p className="mt-3">Method: {order.paymentMethod} </p>
-              <p>Payment : {order.payment ? "Done" : "Pending"}</p>
-              <p>Date : {new Date(order.date).toLocaleDateString()}</p>
+
+            {/* Payment & Date */}
+            <div className="text-sm text-gray-700 space-y-1">
+              <p>Items: <span className="font-medium">{order.items.length}</span></p>
+              <p>Method: {order.paymentMethod}</p>
+              <p>Payment: <span className={order.payment ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}>{order.payment ? "Done" : "Pending"}</span></p>
+              <p>Date: {new Date(order.date).toLocaleDateString()}</p>
             </div>
-            <p className="text-sm sm:text-[15px]">
-              {currency}
-              {order.amount}
+
+            {/* Amount */}
+            <p className="text-base font-semibold text-gray-800">
+              {currency}{order.amount}
             </p>
+
+            {/* Status Dropdown */}
             <select
               onChange={(event) => statusHandler(event, order._id)}
               value={order.status}
-              className="p-2 font-semibold"
+              className="p-2 border rounded-lg text-sm font-medium bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
               <option value="Order Placed">Order Placed</option>
               <option value="Packing">Packing</option>

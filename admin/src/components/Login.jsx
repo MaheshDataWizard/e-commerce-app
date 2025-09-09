@@ -58,7 +58,7 @@ const Login = ({ setToken }) => {
                     </div>
                     <button 
                         disabled={loading} 
-                        className={`mt-2 w-full py-2 px-4 rounded-md text-white ${loading ? "bg-gray-600" : "bg-black"}`} 
+                        className={`mt-2 w-full py-2 px-4 rounded-md text-white cursor-pointer ${loading ? "bg-gray-600" : "bg-black"}`} 
                         type='submit'
                     >
                         {loading ? "Logging in..." : "Login"}
